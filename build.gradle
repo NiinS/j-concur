@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+group 'com.ns.jconcur'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    jmh
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    jmhCompile project
+    jmhCompile 'org.openjdk.jmh:jmh-core:1.18'
+    jmhCompile 'org.openjdk.jmh:jmh-generator-annprocess:1.18'
+
+}
+
+task jmh(type: JavaExec, description: 'Executing JMH benchmarks') {
+    classpath = sourceSets.jmh.runtimeClasspath
+    main = 'org.openjdk.jmh.Main'
+}
+
