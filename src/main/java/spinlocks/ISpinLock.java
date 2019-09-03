@@ -24,38 +24,12 @@
 
 package spinlocks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
- * Yet Another Test And Set Lock
- *
- * A simple test and set lock with all the baggage of spinning on a single
- * global lock state field.
+ * Contract for spin locks
  */
-public class YATASLock implements ISpinLock {
+public interface ISpinLock {
 
-    // the global state lock
-    private final AtomicBoolean lock = new AtomicBoolean();
+    void lock();
 
-    @Override
-    public void lock() {
-       while(checkAndSetWhileCausingCCN(true));
-    }
-
-    @Override
-    public void unlock() {
-        setWhileCausingCCN(false);
-    }
-
-    // CCN = cache coherence noise on a shared bus CPU architecture
-    private boolean checkAndSetWhileCausingCCN(boolean value) {
-        return lock.getAndSet(value);
-    }
-
-    // CCN = cache coherence noise on a shared bus CPU architecture
-    private void setWhileCausingCCN(boolean value) {
-        lock.set(value);
-    }
-
-
+    void unlock();
 }
