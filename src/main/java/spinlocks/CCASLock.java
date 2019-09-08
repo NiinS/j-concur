@@ -26,28 +26,26 @@ package spinlocks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static spinlocks.SpinLockShared.checkAndTrySetWhileCausingCCN;
-import static spinlocks.SpinLockShared.setWhileCausingCCN;
+import static spinlocks.SpinLockShared.*;
 
-/**
- * Yet Another Test And Set Lock
- *
- * A simple test and set lock with all the baggage of spinning on a single
- * global lock state field.
- */
-public class YATASLock implements ISpinLock {
-
-    // the global state lock
-    private final AtomicBoolean lock = new AtomicBoolean();
+public class CCASLock implements ISpinLock {
+    private final AtomicBoolean lock = new AtomicBoolean(false);
 
     @Override
     public void lock() {
-       while(checkAndTrySetWhileCausingCCN(lock, true));
+       while(true){
+           while(fetchWithPossiblySingleCacheMiss(lock))
+               continue; // means someone else is still the owner
+
+           if(!checkAndTrySetWhileCausingCCN(lock, true))
+               return; //means lock acquired
+
+           //else we need to retry from scratch
+       }
     }
 
     @Override
     public void unlock() {
         setWhileCausingCCN(lock, false);
     }
-
 }
