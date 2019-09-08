@@ -24,9 +24,13 @@
 
 package spinlocks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import static spinlocks.SpinLockShared.ALREADY_OWNED;
+import static spinlocks.SpinLockShared.FAILED_TO_ACQUIRE;
+import static spinlocks.SpinLockShared.getCurrentLockStateWithProbableCacheMiss;
+import static spinlocks.SpinLockShared.getLockStateWithAcquisitionAttemptWhileCausingCCN;
+import static spinlocks.SpinLockShared.setLockStateWhileCausingCCN;
 
-import static spinlocks.SpinLockShared.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CCASLock implements ISpinLock {
     private final AtomicBoolean lock = new AtomicBoolean(false);
@@ -34,18 +38,18 @@ public class CCASLock implements ISpinLock {
     @Override
     public void lock() {
        while(true){
-           while(fetchWithPossiblySingleCacheMiss(lock))
+           while(getCurrentLockStateWithProbableCacheMiss(lock) == ALREADY_OWNED)
                continue; // means someone else is still the owner
 
-           if(!checkAndTrySetWhileCausingCCN(lock, true))
-               return; //means lock acquired
+           if(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true) != FAILED_TO_ACQUIRE)
+               return; //means this thread is owner now
 
-           //else we need to retry from scratch
+           //else this thread need to retry from scratch
        }
     }
 
     @Override
     public void unlock() {
-        setWhileCausingCCN(lock, false);
+        setLockStateWhileCausingCCN(lock, false);
     }
 }

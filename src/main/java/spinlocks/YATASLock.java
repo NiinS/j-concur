@@ -24,10 +24,11 @@
 
 package spinlocks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import static spinlocks.SpinLockShared.ALREADY_OWNED;
+import static spinlocks.SpinLockShared.getLockStateWithAcquisitionAttemptWhileCausingCCN;
+import static spinlocks.SpinLockShared.setLockStateWhileCausingCCN;
 
-import static spinlocks.SpinLockShared.checkAndTrySetWhileCausingCCN;
-import static spinlocks.SpinLockShared.setWhileCausingCCN;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Yet Another Test And Set Lock
@@ -42,12 +43,12 @@ public class YATASLock implements ISpinLock {
 
     @Override
     public void lock() {
-       while(checkAndTrySetWhileCausingCCN(lock, true));
+       while(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true) == ALREADY_OWNED);
     }
 
     @Override
     public void unlock() {
-        setWhileCausingCCN(lock, false);
+        setLockStateWhileCausingCCN(lock, false);
     }
 
 }

@@ -28,6 +28,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SpinLockShared {
 
+    public static final boolean FAILED_TO_ACQUIRE = false;
+
+    public static final boolean ALREADY_OWNED = true;
+
     /**
      * Checks the current state of the given lock and modifies it to given new value. Since getAndSet()
      * is a loop effectively, the call only returns when the state has been successfully modified. During its
@@ -41,7 +45,7 @@ public class SpinLockShared {
      * @return the current value of the lock (i.e. the value before it was set to new value)
      */
     // CCN = cache coherence noise on a shared bus CPU architecture
-    public static boolean checkAndTrySetWhileCausingCCN(AtomicBoolean lock, boolean newValue) {
+    public static boolean getLockStateWithAcquisitionAttemptWhileCausingCCN(AtomicBoolean lock, boolean newValue) {
         return lock.getAndSet(newValue);
     }
 
@@ -56,7 +60,7 @@ public class SpinLockShared {
      * @param newValue
      */
     // CCN = cache coherence noise on a shared bus CPU architecture
-    public static void setWhileCausingCCN(AtomicBoolean lock, boolean newValue) {
+    public static void setLockStateWhileCausingCCN(AtomicBoolean lock, boolean newValue) {
         lock.set(newValue);
     }
 
@@ -69,7 +73,7 @@ public class SpinLockShared {
      * @return the current state of the given lock. A 'true' value means
      * some thread is owning this lock.
      */
-    public static boolean fetchWithPossiblySingleCacheMiss(AtomicBoolean lock) {
+    public static boolean getCurrentLockStateWithProbableCacheMiss(AtomicBoolean lock) {
         return lock.get();
     }
 }
