@@ -24,20 +24,35 @@
 
 package spinlocks;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static spinlocks.SpinLockShared.*;
+
 /**
- * Contract for spin locks
+ * An extremely noisy spin lock.
+ *
+ * A simple test and set lock with all the baggage of spinning on a single
+ * global lock state field. In its attempts to check the state of lock, the
+ * requesting thread keeps sending "fetch latest value" requests over the bus
+ * hence causing big noise on the shared cpu bus.
+ *
  */
-public interface ISpinLock {
+public class VanillaNoisySpinLock implements ISpinLock {
 
     /**
-     * The thread invoking this method falls into an implementation specific
-     * spin locking approach. Returning from this method means, the lock has
-     * acquired.
+     * A true value of this lock means lock has been acquired.
      */
-    void lock();
+    private final AtomicBoolean lock = new AtomicBoolean();
 
-    /**
-     * Request to unlock.
-     */
-    void unlock();
+    @Override
+    public void lock() {
+       while(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true) == ALREADY_OWNED)
+           continue; // keep checking while sending check requests on the shared cpu bus
+    }
+
+    @Override
+    public void unlock() {
+        setLockStateWhileCausingCCN(lock, false); //release the lock
+    }
+
 }

@@ -26,6 +26,9 @@ package spinlocks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Shared utilities for spin lock variations.
+ */
 public class SpinLockShared {
 
     public static final boolean FAILED_TO_ACQUIRE = false;

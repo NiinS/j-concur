@@ -24,32 +24,41 @@
 
 package spinlocks;
 
-import static spinlocks.SpinLockShared.ALREADY_OWNED;
-import static spinlocks.SpinLockShared.FAILED_TO_ACQUIRE;
-import static spinlocks.SpinLockShared.getCurrentLockStateWithProbableCacheMiss;
-import static spinlocks.SpinLockShared.getLockStateWithAcquisitionAttemptWhileCausingCCN;
-import static spinlocks.SpinLockShared.setLockStateWhileCausingCCN;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CCASLock implements ISpinLock {
+import static spinlocks.SpinLockShared.*;
+
+/**
+ * A spinning check then atomic check and swap lock.
+ *
+ * The lock requester first checks the state of lock, if not free, it spins
+ * without causing shared bus traffic. It comes out of spin when the lock has been
+ * released by the owner which this thread then attempts to atomically acquire. If
+ * unsuccessful in the attempt, the thread retries from scratch.
+ *
+ */
+public class CheckCheckSpinLock implements ISpinLock {
+
+    /**
+     * A true value of this lock means lock has been acquired.
+     */
     private final AtomicBoolean lock = new AtomicBoolean(false);
 
     @Override
     public void lock() {
        while(true){
            while(getCurrentLockStateWithProbableCacheMiss(lock) == ALREADY_OWNED)
-               continue; // means someone else is still the owner
+               continue; // locally spin on cached state from now on
 
            if(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true) != FAILED_TO_ACQUIRE)
                return; //means this thread is owner now
 
-           //else this thread need to retry from scratch
+           // retry from scratch ..
        }
     }
 
     @Override
     public void unlock() {
-        setLockStateWhileCausingCCN(lock, false);
+        setLockStateWhileCausingCCN(lock, false); //release the lock
     }
 }
