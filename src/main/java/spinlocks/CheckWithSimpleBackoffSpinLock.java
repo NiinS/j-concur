@@ -24,31 +24,53 @@
 
 package spinlocks;
 
-import static spinlocks.SpinLockShared.ALREADY_OWNED;
-import static spinlocks.SpinLockShared.getLockStateWithAcquisitionAttemptWhileCausingCCN;
-import static spinlocks.SpinLockShared.setLockStateWhileCausingCCN;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static spinlocks.SpinLockShared.*;
 
 /**
- * Yet Another Test And Set Lock
+ * A spinning check followed by a back-off lock.
  *
- * A simple test and set lock with all the baggage of spinning on a single
- * global lock state field.
+ * This lock requester thread spins if the lock is not free and then backs-off
+ * for a while in order to try again.
+ *
  */
-public class YATASLock implements ISpinLock {
+public class CheckWithSimpleBackoffSpinLock implements ISpinLock {
 
-    // the global state lock
+    /**
+     * A true value of this lock means lock has been acquired.
+     */
     private final AtomicBoolean lock = new AtomicBoolean();
+
+    /**
+     * Back off gap in millisecs.
+     */
+    private long backOffGapMs;
+
+    public CheckWithSimpleBackoffSpinLock(long backOffGapMs) {
+        this.backOffGapMs = backOffGapMs;
+    }
 
     @Override
     public void lock() {
-       while(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true) == ALREADY_OWNED);
+        while(true){
+            while(getCurrentLockStateWithProbableCacheMiss(lock) == SpinLockShared.ALREADY_OWNED)
+                continue; // locally spin on cached state from now on
+
+            if(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true))
+                return; // means this thread is owner now
+            else
+                LockSupport.parkNanos(MILLISECONDS.toNanos(backOffGapMs)); // back off
+
+            // retry from scratch..
+        }
+
     }
 
     @Override
     public void unlock() {
-        setLockStateWhileCausingCCN(lock, false);
+        setLockStateWhileCausingCCN(lock, false); // release the lock
     }
-
 }
