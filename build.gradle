@@ -52,4 +52,3 @@ task jmh(type: JavaExec, description: 'Executing JMH benchmarks') {
     classpath = sourceSets.jmh.runtimeClasspath
     main = 'org.openjdk.jmh.Main'
 }
-
