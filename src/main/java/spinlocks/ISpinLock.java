@@ -26,13 +26,15 @@ package spinlocks;
 
 /**
  * Contract for spin locks
+ *
+ * @author Nitin S (sin.nitins@gmail.com)
  */
 public interface ISpinLock {
 
     /**
      * The thread invoking this method falls into an implementation specific
      * spin locking approach. Returning from this method means, the lock has
-     * acquired.
+     * been acquired.
      */
     void lock();
 

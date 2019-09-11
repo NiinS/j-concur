@@ -26,10 +26,39 @@ package spinlocks;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Queue based lock approach proposed by Craig, Landin and Hagerston (CLH).
+ * ftp://ftp.cs.washington.edu/tr/1993/02/UW-CSE-93-02-02.pdf
+ *
+ * Benefit of queue based spin locking is that requesting threads don't spin
+ * on a single shared lock instead they spin on the lock held by previous
+ * requester hence forming a queue like structure. A requesting thread acquires
+ * the tail of the queue (lock held by predecessor) and sets itself as tail.
+ *
+ * This queue based approach ensures lock fairness and unlike timeout based approaches
+ * threads don't unnecessarily wait too little or too long.
+ *
+ * There is no upper bound on how many threads can try to acquire. They will always
+ * request the lock in a queued fashion.
+ *
+ * @author Nitin S (sin.nitins@gmail.com)
+ */
 public class QCLHSpinLock implements ISpinLock {
 
+    /**
+     * The tail of queue representing the lock held by last requester.
+     */
     private final AtomicReference<LockSlot> tail;
+
+    /**
+     * Reference to predecessor's lock from current requester's point of view.
+     * Current requester spins on this lock.
+     */
     private final ThreadLocal<LockSlot> predecessor;
+
+    /**
+     * The lock owned by current requester. Next requester will spin on this lock.
+     */
     private final ThreadLocal<LockSlot> self;
 
     public QCLHSpinLock() {
@@ -54,9 +83,14 @@ public class QCLHSpinLock implements ISpinLock {
     public void lock() {
         LockSlot slot = self.get();
         slot.isLocked = true;
+
+        // get the predecessor's lock (tail) and set self
+        // as the tail of the queue
         LockSlot predecessorSlot = tail.getAndSet(slot);
         predecessor.set(predecessorSlot);
 
+        // spin on the predecessor's lock until the predecessor
+        // releases it.
         while (predecessorSlot.isLocked)
             continue; //spin until predecessor releases
     }
@@ -69,6 +103,6 @@ public class QCLHSpinLock implements ISpinLock {
     }
 
     private static class LockSlot {
-        boolean isLocked;
+        volatile boolean isLocked;
     }
 }

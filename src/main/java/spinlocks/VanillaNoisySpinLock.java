@@ -36,6 +36,7 @@ import static spinlocks.SpinLockShared.*;
  * requesting thread keeps sending "fetch latest value" requests over the bus
  * hence causing big noise on the shared cpu bus.
  *
+ * @author Nitin S (sin.nitins@gmail.com)
  */
 public class VanillaNoisySpinLock implements ISpinLock {
 

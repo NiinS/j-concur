@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Shared utilities for spin lock variations.
+ *
+ * @author Nitin S (sin.nitins@gmail.com)
  */
 public class SpinLockShared {
 
