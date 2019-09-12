@@ -24,7 +24,10 @@
 
 package spinlocks;
 
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
 
 import static java.lang.String.format;
 import static spinlocks.SpinLockShared.*;
@@ -35,6 +38,8 @@ import static spinlocks.SpinLockShared.*;
  * This lock requester thread spins if the lock is not free and then backs-off
  * for a while in order to try again.
  *
+ * @author Nitin S (sin.nitins@gmail.com)
+ *
  */
 public class CheckWithAdaptiveBackoffSpinLock implements ISpinLock {
 
@@ -43,27 +48,25 @@ public class CheckWithAdaptiveBackoffSpinLock implements ISpinLock {
      */
     private final AtomicBoolean lock = new AtomicBoolean();
 
-    private final BackOffLogic backOffLogic;
-
     /**
      * Back off time range in millisecs.
      */
-    private long minDelay;
-    private long maxDelay;
+    private int minDelay;
+    private int maxDelay;
 
-    public CheckWithAdaptiveBackoffSpinLock(long minDelay, long maxDelay) {
+    public CheckWithAdaptiveBackoffSpinLock(int minDelay, int maxDelay) {
         if(minDelay >= maxDelay)
             throw new IllegalArgumentException(format("Min delay '{}' ms must be smaller than max delay '{}' ms",
                     minDelay, maxDelay));
 
         this.minDelay = minDelay > 0 && minDelay <= 5? minDelay : 1;
         this.maxDelay = maxDelay > 0 && maxDelay <= 100 ? maxDelay : 100;
-        backOffLogic = new BackOffLogic(minDelay, maxDelay);
     }
 
     @Override
     public void lock() {
         while(true){
+            BackOffLogic backOffLogic = new BackOffLogic(minDelay, maxDelay);
             while(getCurrentLockStateWithProbableCacheMiss(lock) == SpinLockShared.ALREADY_OWNED)
                 continue; // locally spin on cached state from now on
 
@@ -82,14 +85,28 @@ public class CheckWithAdaptiveBackoffSpinLock implements ISpinLock {
         setLockStateWhileCausingCCN(lock, false); // release the lock
     }
 
+    /**
+     * Adaptive backoff logic which upon every next invocation
+     * increases the time delay.
+     */
     private static class BackOffLogic{
+        private final Random random;
+        private final int minDelay;
+        private final int maxDelay;
+        private int upperrBound;
 
-        public BackOffLogic(long minDelay, long maxDelay) {
+        public BackOffLogic(int minDelay, int maxDelay) {
+            this.minDelay = minDelay;
+            this.maxDelay = maxDelay;
+            this.upperrBound = minDelay;
+            random = new Random();
 
         }
 
         public void backOff() {
-
+           long delay = random.nextInt(upperrBound);
+           upperrBound = Math.max(maxDelay, 2*upperrBound);
+            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(delay));
         }
     }
 }

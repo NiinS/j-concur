@@ -36,6 +36,7 @@ import static spinlocks.SpinLockShared.*;
  * released by the owner which this thread then attempts to atomically acquire. If
  * unsuccessful in the attempt, the thread retries from scratch.
  *
+ * @author Nitin S (sin.nitins@gmail.com)
  */
 public class CheckCheckSpinLock implements ISpinLock {
 

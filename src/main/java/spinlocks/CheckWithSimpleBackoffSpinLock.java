@@ -36,6 +36,7 @@ import static spinlocks.SpinLockShared.*;
  * This lock requester thread spins if the lock is not free and then backs-off
  * for a while in order to try again.
  *
+ * @author Nitin S (sin.nitins@gmail.com)
  */
 public class CheckWithSimpleBackoffSpinLock implements ISpinLock {
 
