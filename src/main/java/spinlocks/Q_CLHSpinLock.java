@@ -27,23 +27,33 @@ package spinlocks;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Queue based lock approach proposed by Craig, Landin and Hagerston (CLH).
- * ftp://ftp.cs.washington.edu/tr/1993/02/UW-CSE-93-02-02.pdf
+ * Queue based spin locking approach proposed by Craig, Landin and Hagerston (CLH).
  *
- * Benefit of queue based spin locking is that requesting threads don't spin
- * on a single shared lock instead they spin on the lock held by previous
- * requester hence forming a queue like structure. A requesting thread acquires
- * the tail of the queue (lock held by predecessor) and sets itself as tail.
+ * <br/><a href="ftp://ftp.cs.washington.edu/tr/1993/02/UW-CSE-93-02-02.pdf"><b>Link to paper</b></a>
  *
- * This queue based approach ensures lock fairness and unlike timeout based approaches
- * threads don't unnecessarily wait too little or too long.
+ * <p>
+ * In queue based spin locking requesting threads don't spin on a single shared lock
+ * instead they spin on the lock held by previous requester hence forming a queue like
+ * structure. A requesting thread acquires the tail of the queue (lock held by predecessor)
+ * and sets itself as tail. And then spins on predecessor's lock until predecessor releases it.
+ * </p>
+ *<p>
+ * <h1>Benefits</h1>
+ * <ul>
+ *  <li>This queue based approach ensures lock fairness</li>
+ *  <li>and unlike timeout based approaches threads don't unnecessarily wait
+ *     too little or too long.</li>
+ *  <li>There is no upper bound on how many threads can try to acquire. They will always
+ * request the lock in a queued fashion.</li>
+ * </ul>
+ *</p>
  *
- * There is no upper bound on how many threads can try to acquire. They will always
- * request the lock in a queued fashion.
+ * @see Q_MCSSpinLock
  *
  * @author Nitin S (sin.nitins@gmail.com)
+ *
  */
-public class QCLHSpinLock implements ISpinLock {
+public class Q_CLHSpinLock implements ISpinLock {
 
     /**
      * The tail of queue representing the lock held by last requester.
@@ -61,7 +71,7 @@ public class QCLHSpinLock implements ISpinLock {
      */
     private final ThreadLocal<LockSlot> self;
 
-    public QCLHSpinLock() {
+    public Q_CLHSpinLock() {
         tail = new AtomicReference<LockSlot>(new LockSlot());
 
         predecessor = new ThreadLocal<LockSlot>(){
