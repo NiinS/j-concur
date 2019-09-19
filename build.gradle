@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 NitinS
+ * Copyright (c) 2019 NitinS (sin.nitins@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,7 @@ dependencies {
     jmhCompile 'org.openjdk.jmh:jmh-core:1.18'
     jmhCompile 'org.openjdk.jmh:jmh-generator-annprocess:1.18'
 
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 }
 
 task jmh(type: JavaExec, description: 'Executing JMH benchmarks') {

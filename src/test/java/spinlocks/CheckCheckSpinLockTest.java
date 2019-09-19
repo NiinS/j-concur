@@ -24,42 +24,22 @@
 
 package spinlocks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static spinlocks.SpinLockShared.*;
+import org.junit.Test;
 
 /**
- * A spinning check then atomic check and swap lock.
- *
- * The lock requester first checks the state of lock, if not free, it spins
- * without causing shared bus traffic. It comes out of spin when the lock has been
- * released by the owner which this thread then attempts to atomically acquire. If
- * unsuccessful in the attempt, the thread retries from scratch.
+ * Verifies the sanity of {@link CheckCheckSpinLock}
  *
  * @author Nitin S (sin.nitins@gmail.com)
  */
-public class CheckCheckSpinLock implements ISpinLock {
+public class CheckCheckSpinLockTest extends SpinLockVerificationTemplate {
 
-    /**
-     * A true value of this lock means lock has been acquired.
-     */
-    private final AtomicBoolean lock = new AtomicBoolean(false);
-
-    @Override
-    public void lock() {
-       while(true){
-           while(getCurrentLockStateWithProbableCacheMiss(lock) == ALREADY_OWNED)
-               continue; // locally spin on cached state from now on
-
-           if(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true) != ALREADY_OWNED)
-               return; //means this thread is owner now
-
-           // retry from scratch ..
-       }
+    @Test
+    public void verifyLockSanity() {
+        doVerifyLockSanity(10);
     }
 
     @Override
-    public void unlock() {
-        setLockStateWhileCausingCCN(lock, false); //release the lock
+    ISpinLock lockUnderTest() {
+        return new CheckCheckSpinLock();
     }
 }

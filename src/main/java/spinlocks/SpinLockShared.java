@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 NitinS
+ * Copyright (c) 2019 NitinS (sin.nitins@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Nitin S (sin.nitins@gmail.com)
  */
 public class SpinLockShared {
-
-    public static final boolean FAILED_TO_ACQUIRE = false;
 
     public static final boolean ALREADY_OWNED = true;
 
