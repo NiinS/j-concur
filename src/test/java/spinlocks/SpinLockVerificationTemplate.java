@@ -83,7 +83,7 @@ public abstract class SpinLockVerificationTemplate {
 
     private void doSthRandom(Random random) {
         long randomDelay = Math.abs(random.nextInt(100));
-        out.printf("\n%d- %s - waiting for %d ms", System.currentTimeMillis(), Thread.currentThread().getName(),
+        out.printf("\n%d - %s -- busy working for %d ms", System.currentTimeMillis(), Thread.currentThread().getName(),
                 randomDelay);
         waitWithoutRelinquishingLock(randomDelay);
     }
