@@ -48,18 +48,18 @@ public class CriticalSection {
 
     public void enter(){
         String owner = Thread.currentThread().getName();
-        out.printf("\n%d - %s - attempting to enter critical section",
+        out.printf("\n%d - %s < attempting to enter critical section",
                 System.currentTimeMillis(), owner);
         lock.lock();
         criticalSection.add(owner);
         entryHistory.add(owner);
-        out.printf("\n%d - %s - entered critical section", System.currentTimeMillis(), owner);
+        out.printf("\n%d - %s << entered critical section", System.currentTimeMillis(), owner);
     }
 
     public void exit(){
         if(!criticalSection.isEmpty()) {
             String owner = criticalSection.remove(0);
-            out.printf("\n%d - %s - exiting critical section", System.currentTimeMillis(), owner);
+            out.printf("\n%d - %s >> exiting critical section", System.currentTimeMillis(), owner);
             exitHistory.add(owner);
             lock.unlock();
         }
