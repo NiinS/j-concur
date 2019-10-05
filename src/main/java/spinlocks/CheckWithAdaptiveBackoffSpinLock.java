@@ -70,7 +70,7 @@ public class CheckWithAdaptiveBackoffSpinLock implements ISpinLock {
             while(getCurrentLockStateWithProbableCacheMiss(lock) == SpinLockShared.ALREADY_OWNED)
                 continue; // locally spin on cached state from now on
 
-            if(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true))
+            if(getLockStateWithAcquisitionAttemptWhileCausingCCN(lock, true) != ALREADY_OWNED)
                 return; // means this thread is owner now
             else
                 backOffLogic.backOff();
