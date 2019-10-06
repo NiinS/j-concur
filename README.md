@@ -3,10 +3,7 @@ Java library for frequently used constructs on shared memory processor architect
 
 Comp architectural wisdom says single threaded pinned code runs faster than multi-threaded non deterministic code. But if running with multiple application threads in JVM is an inevitability, this library will keep us floating.
 
-`This library uses JMH (Java Microbenchmarking Harness) for benchmarking and uses Python's capabilities to
-present the numbers in intuitive ways. The folder 'inferences' contains Python Jupyter notebooks 
-containing package specific rendering code and resulting image files which have been used on this 
-landing page.` 
+`This library leverages JMH (Java Microbenchmarking Harness) for benchmarking and uses Python's capabilities to present the results in intuitive ways. The folder 'inferences' contains Python Jupyter notebooks containing package specific plotting (NumPy, MatplotLib) code and resulting image files which have been rendered on this landing page.` 
   
 #### Spin Lock Performance in single versus multi-threaded setup
 
