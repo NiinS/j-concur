@@ -14,6 +14,8 @@ Following concrete implementation classes are provided by the library:
 - Backoff based locks (performing occasional global spinning and timed backoffs)
 - Queue based locks (using queue like structures to perform local spinning and guaranteeing lock fairness)
 
+![png](inferences/images/spinlock_performance.png)
+
 Here are some observations made in the following setup:
 
 - JVM version: JDK 1.8.0_212, VM 25.212-b04
@@ -26,21 +28,10 @@ Back-off based spin locks seem to work faster than other classes although they s
 limitation that they backoff for fixed or adaptive time durations which is not deterministic
 and they are not fair as well.
 
- 
-![png](inferences/images/spinlock-perf-matrix.png)
-
 Vanilla locks use ordinary optimistic spin locking to determine ownership and lock release 
 which induces more cache coherence traffic among CPU cores. Moreover they are not fair.       
-
-![png](inferences/images/spinlock_vanilla.png)
-
-
-![png](inferences/images/spinlocks_backoff.png)
 
 Queue based spin lock fall in the middle ground. They cause minimum amount of cache coherence
  traffic and are completely fair guaranteeing lock fairness and first-come-first-served ordering.
  
-![png](inferences/images/spinlocks_queue.png)
-
-
 [ISpinLock]: java/spinlocks/ISpinLock
