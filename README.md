@@ -1,4 +1,7 @@
 # j-concur
+
+(This is an ongoing work; being done whenever I've spare time off my professional work..)
+
 Java library for frequently used constructs on shared memory processor architectures. 
 
 Comp architectural wisdom says single threaded pinned code runs faster than multi-threaded non deterministic code. But if running with multiple application threads in JVM is an inevitability, this library will keep us floating.
